@@ -134,7 +134,7 @@ export function SetupScreen({
 }) {
   const addTeam = () => {
     if (teams.length >= 6) return;
-    setTeams([...teams, { id: Math.random().toString(), name: `Команда ${teams.length + 1}`, score: 0, players: [] }]);
+    setTeams([...teams, { id: Math.random().toString(), name: `Команда ${teams.length + 1}`, score: 0, players: [], currentExplainerIndex: 0 }]);
   };
 
   const removeTeam = (id: string) => {

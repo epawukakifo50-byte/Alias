@@ -59,7 +59,9 @@ export default function App() {
         );
       case 'playing': {
         const activeTeam = game.gameState.teams[game.gameState.activeTeamIndex];
-        const isActiveTeam = activeTeam.players.some(p => p.id === game.localPlayer?.id);
+        const explainerIndex = activeTeam.currentExplainerIndex % activeTeam.players.length || 0;
+        const explainer = activeTeam.players[explainerIndex];
+        const isExplainer = explainer?.id === game.localPlayer?.id;
         return (
           <PlayScreen 
             currentWord={game.gameState.currentWord || ''}
@@ -67,19 +69,22 @@ export default function App() {
             onGuessed={game.handleWordGuessed}
             onSkipped={game.handleWordSkipped}
             onTimeUp={game.endTurn}
-            isActiveTeam={isActiveTeam}
+            isExplainer={isExplainer}
+            explainerName={explainer?.name}
             currentRoundWords={game.gameState.currentRoundWords}
           />
         );
       }
       case 'review': {
         const activeTeam = game.gameState.teams[game.gameState.activeTeamIndex];
-        const isActiveTeam = activeTeam.players.some(p => p.id === game.localPlayer?.id);
+        const explainerIndex = activeTeam.currentExplainerIndex % activeTeam.players.length || 0;
+        const explainer = activeTeam.players[explainerIndex];
+        const isExplainer = explainer?.id === game.localPlayer?.id;
         return (
           <ReviewScreen 
             words={game.gameState.currentRoundWords}
             onFinish={game.finishReview}
-            isActiveTeam={isActiveTeam}
+            isActiveTeam={isExplainer}
             onToggleWord={game.toggleWordStatus}
             onVoteWord={game.voteWord}
             localPlayerId={game.localPlayer?.id || ''}

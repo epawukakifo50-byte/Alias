@@ -9,7 +9,8 @@ export function PlayScreen({
   onGuessed, 
   onSkipped, 
   onTimeUp,
-  isActiveTeam,
+  isExplainer,
+  explainerName,
   currentRoundWords
 }: { 
   currentWord: string, 
@@ -17,7 +18,8 @@ export function PlayScreen({
   onGuessed: () => void, 
   onSkipped: () => void, 
   onTimeUp: () => void,
-  isActiveTeam: boolean,
+  isExplainer: boolean,
+  explainerName?: string,
   currentRoundWords: RoundWord[]
 }) {
   const [timeLeft, setTimeLeft] = useState(timeLimit);
@@ -27,12 +29,12 @@ export function PlayScreen({
 
   useEffect(() => {
     if (timeLeft <= 0) {
-      onTimeUp();
+      if (isExplainer) onTimeUp();
       return;
     }
     const timer = setTimeout(() => setTimeLeft(t => t - 1), 1000);
     return () => clearTimeout(timer);
-  }, [timeLeft, onTimeUp]);
+  }, [timeLeft, onTimeUp, isExplainer]);
 
   const handleGuess = () => {
     setExitDir(100);
@@ -63,7 +65,7 @@ export function PlayScreen({
 
       <div className="flex-1 flex flex-col relative p-8 h-full">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[140px] font-black opacity-[0.03] leading-none pointer-events-none select-none whitespace-nowrap z-0">
-          {isActiveTeam ? 'WORD' : 'HIDDEN'}
+          {isExplainer ? 'WORD' : 'HIDDEN'}
         </div>
         
         {/* Previous Words Stream */}
@@ -94,11 +96,11 @@ export function PlayScreen({
               className="absolute flex flex-col items-center justify-center z-10 w-full px-8"
             >
               <h1 className="text-[50px] sm:text-[70px] md:text-[90px] text-center font-black leading-[0.9] tracking-tighter uppercase break-words text-white drop-shadow-2xl">
-                {isActiveTeam ? currentWord : <span className="tracking-[0.2em] opacity-30 select-none">••••••••</span>}
+                {isExplainer ? currentWord : <span className="tracking-[0.2em] opacity-30 select-none">••••••••</span>}
               </h1>
-              {!isActiveTeam && (
-                 <div className="mt-8 text-[#888] font-bold text-xs uppercase tracking-widest text-center">
-                   Ожидайте ход вашей команды
+              {!isExplainer && (
+                 <div className="mt-8 text-[#888] font-bold text-sm uppercase tracking-widest text-center">
+                   ОБЪЯСНЯЕТ: <span className="text-white">{explainerName || 'ИГРОК'}</span>
                  </div>
               )}
             </motion.div>
@@ -107,7 +109,7 @@ export function PlayScreen({
       </div>
 
       <div className="flex gap-4 p-6 h-40">
-        {isActiveTeam ? (
+        {isExplainer ? (
           <>
             <button 
               onClick={handleSkip}

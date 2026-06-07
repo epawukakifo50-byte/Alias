@@ -14,7 +14,9 @@ export function PreTurnScreen({
   localPlayerId: string
 }) {
   const activeTeam = teams[activeTeamIndex];
-  const isMyTeamActive = activeTeam.players.some(p => p.id === localPlayerId);
+  const explainerIndex = activeTeam.currentExplainerIndex % activeTeam.players.length || 0;
+  const explainer = activeTeam.players[explainerIndex];
+  const isExplainer = explainer?.id === localPlayerId;
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col h-full max-w-5xl mx-auto p-6 md:p-12">
@@ -23,16 +25,26 @@ export function PreTurnScreen({
         {/* Left Side: Active Team Info */}
         <div className="flex-1 text-center md:text-left flex flex-col justify-center">
           <h3 className="text-sm font-black uppercase tracking-[0.5em] text-[#888] mb-6">ХОД КОМАНДЫ</h3>
-          <h2 className="text-[80px] lg:text-[120px] leading-[0.9] font-black tracking-tighter uppercase mb-12 text-[#CCFF00] drop-shadow-2xl">
+          <h2 className="text-[80px] lg:text-[120px] leading-[0.9] font-black tracking-tighter uppercase mb-6 text-[#CCFF00] drop-shadow-2xl">
             {activeTeam.name}
           </h2>
           
+          {explainer && (
+            <div className="mb-12 bg-[#222] inline-block self-center md:self-start px-6 py-3 rounded-xl border border-[#444]">
+              <span className="text-xs uppercase tracking-widest text-[#888] block mb-1">СЕЙЧАС ОБЪЯСНЯЕТ</span>
+              <span className="text-xl font-black text-white">{explainer.name} {isExplainer && '(ВЫ)'}</span>
+            </div>
+          )}
+          
           <div className="flex flex-wrap gap-4 items-center justify-center md:justify-start mb-8">
-            {activeTeam.players.map(p => (
-              <span key={p.id} className={`px-4 py-2 border rounded border-[#444] text-sm font-black uppercase tracking-widest ${p.id === localPlayerId ? 'text-[#CCFF00] border-[#CCFF00] bg-[#CCFF00]/10' : 'text-white'}`}>
-                {p.name} {p.id === localPlayerId && '(ВЫ)'}
-              </span>
-            ))}
+            {activeTeam.players.map(p => {
+              const isPExplainer = p.id === explainer?.id;
+              return (
+                <span key={p.id} className={`px-4 py-2 border rounded border-[#444] text-sm font-black uppercase tracking-widest ${isPExplainer ? 'text-[#CCFF00] border-[#CCFF00] bg-[#CCFF00]/10' : 'text-white'}`}>
+                  {p.name} {p.id === localPlayerId && !isPExplainer && '(ВЫ)'}
+                </span>
+              );
+            })}
             {activeTeam.players.length === 0 && (
               <span className="text-xs font-bold uppercase opacity-30 tracking-widest">Нет игроков</span>
             )}
@@ -41,14 +53,14 @@ export function PreTurnScreen({
           <div className="mt-8">
             <button 
               onClick={onReady} 
-              disabled={!isMyTeamActive && activeTeam.players.length > 0} 
+              disabled={!isExplainer && activeTeam.players.length > 0} 
               className="w-full md:w-auto px-12 bg-white text-black h-24 text-3xl font-black uppercase hover:bg-[#CCFF00] focus:outline-none transition-all focus:ring-4 focus:ring-[#CCFF00]/50 shadow-2xl flex items-center justify-center gap-4 disabled:opacity-50 disabled:bg-[#333] disabled:text-[#666] disabled:cursor-not-allowed group"
             >
               СТАРТ МАТЧА
               <ArrowRight className="group-hover:translate-x-2 transition-transform" size={32} />
             </button>
-            {!isMyTeamActive && activeTeam.players.length > 0 && (
-              <p className="text-[#888] font-bold text-xs uppercase tracking-widest mt-4">Ждем пока начнет представитель команды</p>
+            {!isExplainer && activeTeam.players.length > 0 && (
+              <p className="text-[#888] font-bold text-xs uppercase tracking-widest mt-4">Ждем пока начнет ведущий: {explainer?.name}</p>
             )}
           </div>
         </div>

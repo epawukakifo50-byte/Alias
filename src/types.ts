@@ -9,6 +9,7 @@ export type Team = {
   name: string;
   score: number;
   players: Player[];
+  currentExplainerIndex: number;
 };
 
 export type GamePhase = 'menu' | 'setup' | 'pre-turn' | 'playing' | 'review' | 'game-over' | 'history';

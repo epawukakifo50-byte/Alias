@@ -78,7 +78,7 @@ export function useMultiplayerGame() {
 
   const startGame = () => {
     if (!gameState || !socket) return;
-    const updatedTeams = gameState.teams.map(t => ({ ...t, score: 0 }));
+    const updatedTeams = gameState.teams.map(t => ({ ...t, score: 0, currentExplainerIndex: 0 }));
     socket.emit('updateState', { 
       phase: 'pre-turn',
       teams: updatedTeams,
@@ -120,11 +120,20 @@ export function useMultiplayerGame() {
       word: gameState.currentWord || '',
       status
     };
-
-    socket.emit('updateState', {
+    
+    const newState = {
+      ...gameState,
       currentRoundWords: [...gameState.currentRoundWords, newWordEntry],
       currentWord: randomWord,
       usedWords: [...gameState.usedWords, randomWord]
+    };
+    
+    setGameState(newState);
+
+    socket.emit('updateState', {
+      currentRoundWords: newState.currentRoundWords,
+      currentWord: newState.currentWord,
+      usedWords: newState.usedWords
     });
   };
 
@@ -147,6 +156,12 @@ export function useMultiplayerGame() {
 
     const updatedTeams = [...gameState.teams];
     updatedTeams[gameState.activeTeamIndex].score += pointsMade;
+    
+    // Rotate explainer for the team that just finished
+    const currentTeam = updatedTeams[gameState.activeTeamIndex];
+    if (currentTeam.players.length > 0) {
+      currentTeam.currentExplainerIndex = (currentTeam.currentExplainerIndex + 1) % currentTeam.players.length;
+    }
 
     let nextPhase = 'pre-turn';
     let nextHistory = gameState.history;
