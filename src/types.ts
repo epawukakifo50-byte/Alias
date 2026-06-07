@@ -39,6 +39,7 @@ export type MatchHistory = {
 };
 
 export type GameState = {
+  hostId: string;
   phase: GamePhase;
   teams: Team[];
   spectators: Player[];
@@ -46,7 +47,8 @@ export type GameState = {
   activeTeamIndex: number;
   currentRoundWords: RoundWord[];
   currentWordIndex: number;
-  timeRemaining: number;
+  timeRemaining: number; // Deprecated, keeping right now for sync
+  turnEndTime?: number; // Added to fix timer reloading bug
   history: MatchHistory[];
   currentWord?: string;
   turnWordActive?: boolean;

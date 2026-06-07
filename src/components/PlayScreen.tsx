@@ -6,6 +6,7 @@ import { RoundWord } from '../types';
 export function PlayScreen({ 
   currentWord, 
   timeLimit, 
+  turnEndTime,
   onGuessed, 
   onSkipped, 
   onTimeUp,
@@ -15,6 +16,7 @@ export function PlayScreen({
 }: { 
   currentWord: string, 
   timeLimit: number, 
+  turnEndTime?: number,
   onGuessed: () => void, 
   onSkipped: () => void, 
   onTimeUp: () => void,
@@ -22,19 +24,29 @@ export function PlayScreen({
   explainerName?: string,
   currentRoundWords: RoundWord[]
 }) {
-  const [timeLeft, setTimeLeft] = useState(timeLimit);
+  const [timeLeft, setTimeLeft] = useState(
+    turnEndTime ? Math.max(0, Math.ceil((turnEndTime - Date.now()) / 1000)) : timeLimit
+  );
   // Optional visually tracking the last action for animation direction
   const [animationKey, setAnimationKey] = useState(0);
   const [exitDir, setExitDir] = useState<number>(0);
 
   useEffect(() => {
-    if (timeLeft <= 0) {
-      if (isExplainer) onTimeUp();
-      return;
-    }
-    const timer = setTimeout(() => setTimeLeft(t => t - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [timeLeft, onTimeUp, isExplainer]);
+    if (!turnEndTime) return;
+    
+    const tick = () => {
+      const remaining = Math.max(0, Math.ceil((turnEndTime - Date.now()) / 1000));
+      setTimeLeft(remaining);
+      if (remaining <= 0) {
+        if (isExplainer) onTimeUp();
+        clearInterval(interval);
+      }
+    };
+    
+    tick(); // initial sync
+    const interval = setInterval(tick, 200);
+    return () => clearInterval(interval);
+  }, [turnEndTime, onTimeUp, isExplainer]);
 
   const handleGuess = () => {
     setExitDir(100);

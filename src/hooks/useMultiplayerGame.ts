@@ -7,9 +7,16 @@ export function useMultiplayerGame() {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [localPlayer, setLocalPlayer] = useState<Player | null>(null);
+  const [roomId, setRoomId] = useState<string>('');
   const [wordsList, setWordsList] = useState<string[]>([]);
   
   useEffect(() => {
+    // Determine Room ID from URL
+    let currentRoomId = window.location.pathname.replace('/', '').toUpperCase();
+    if (currentRoomId) {
+      setRoomId(currentRoomId);
+    }
+
     // Generate or retrieve player ID
     let storedId = localStorage.getItem('alias_player_id');
     let storedName = localStorage.getItem('alias_player_name');
@@ -33,7 +40,9 @@ export function useMultiplayerGame() {
     const newSocket = io(backendUrl);
 
     newSocket.on('connect', () => {
-      newSocket.emit('joinGame', player);
+      if (currentRoomId) {
+        newSocket.emit('joinGame', player, currentRoomId);
+      }
     });
 
     newSocket.on('gameState', (state: GameState) => {
@@ -52,11 +61,41 @@ export function useMultiplayerGame() {
   }, []);
 
   const updatePlayerName = (name: string) => {
-    if (!localPlayer || !socket) return;
+    if (!localPlayer || !socket || !roomId) return;
     const updated = { ...localPlayer, name };
     setLocalPlayer(updated);
     localStorage.setItem('alias_player_name', name);
-    socket.emit('joinGame', updated); // rejoin to update name
+    socket.emit('joinGame', updated, roomId); // rejoin to update name
+  };
+
+  const joinRoom = (code: string) => {
+    const formattedCode = code.toUpperCase();
+    setRoomId(formattedCode);
+    window.history.pushState(null, '', `/${formattedCode}`);
+    if (socket && localPlayer) {
+      socket.emit('joinGame', localPlayer, formattedCode);
+    }
+  };
+
+  const createRoom = () => {
+    const newRoomId = uuidv4().substring(0, 6).toUpperCase();
+    setRoomId(newRoomId);
+    window.history.pushState(null, '', `/${newRoomId}`);
+    if (socket && localPlayer) {
+      socket.emit('joinGame', localPlayer, newRoomId);
+    }
+  };
+
+  const leaveRoom = () => {
+    setRoomId('');
+    window.history.pushState(null, '', `/`);
+    setGameState(null);
+    if (socket) {
+      // Just rejoin an empty room to leave the current socket room
+      // or we just disconnect/reconnect, or the server handles 'leaveRoom'
+      // socket.emit('leaveRoom');
+      window.location.reload(); 
+    }
   };
 
   const movePlayer = (targetTeamId: string | 'spectator') => {
@@ -99,12 +138,14 @@ export function useMultiplayerGame() {
   const startTurn = () => {
     if (!socket || wordsList.length === 0 || !gameState) return;
     const randomWord = pickRandomWord(gameState.usedWords);
+    const duration = gameState.settings.turnDurationSeconds || 60;
     socket.emit('updateState', { 
       phase: 'playing',
       currentRoundWords: [],
       currentWord: randomWord,
       turnWordActive: true,
-      timeRemaining: gameState?.settings.turnDurationSeconds || 60,
+      timeRemaining: duration,
+      turnEndTime: Date.now() + duration * 1000,
       usedWords: [...gameState.usedWords, randomWord]
     });
   };
@@ -234,6 +275,10 @@ export function useMultiplayerGame() {
   return {
     gameState,
     localPlayer,
+    roomId,
+    joinRoom,
+    createRoom,
+    leaveRoom,
     updatePlayerName,
     movePlayer,
     setSettings,

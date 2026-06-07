@@ -15,32 +15,48 @@ const io = new Server(httpServer, {
 
 const PORT = process.env.PORT || 3000;
 
-// Internal Game State on the Server
-let gameState: GameState = {
-  phase: 'menu',
-  teams: [],
-  spectators: [],
-  settings: {
-    turnDurationSeconds: 60,
-    scoreToWin: 50,
-    penaltyForSkip: false,
-  },
-  activeTeamIndex: 0,
-  currentRoundWords: [],
-  currentWordIndex: 0,
-  timeRemaining: 60,
-  history: [],
-  usedWords: [],
-};
+const games: Record<string, GameState> = {};
 
-// Rooms / Channels can be done if needed, but for now just one global game room.
+function getGameState(roomId: string, initiatorId?: string): GameState {
+  if (!games[roomId]) {
+    games[roomId] = {
+      hostId: initiatorId || '',
+      phase: 'setup',
+      teams: [],
+      spectators: [],
+      settings: {
+        turnDurationSeconds: 60,
+        scoreToWin: 50,
+        penaltyForSkip: false,
+      },
+      activeTeamIndex: 0,
+      currentRoundWords: [],
+      currentWordIndex: 0,
+      timeRemaining: 60,
+      history: [],
+      usedWords: [],
+    };
+  }
+  return games[roomId];
+}
 
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
-  socket.emit('gameState', gameState);
+  socket.on('joinGame', (player: Player, roomId: string) => {
+    if (!roomId) return;
+    
+    // Leave previous active room
+    if (socket.data.roomId && socket.data.roomId !== roomId) {
+      socket.leave(socket.data.roomId);
+    }
 
-  socket.on('joinGame', (player: Player) => {
+    socket.join(roomId);
+    socket.data.roomId = roomId;
+    socket.data.playerId = player.id;
+    
+    const gameState = getGameState(roomId, player.id);
+
     // Check if player exists, if not add to spectators
     const existingSpectator = gameState.spectators.find(p => p.id === player.id);
     let foundInTeam = false;
@@ -60,10 +76,14 @@ io.on('connection', (socket) => {
        existingSpectator.name = player.name;
     }
     
-    io.emit('gameState', gameState);
+    io.to(roomId).emit('gameState', gameState);
   });
 
   socket.on('movePlayer', ({ playerId, targetTeamId }: { playerId: string, targetTeamId: string | 'spectator' }) => {
+    const roomId = socket.data.roomId;
+    if (!roomId) return;
+    const gameState = getGameState(roomId);
+    
     let playerObj: Player | undefined = undefined;
 
     // Remove player from current location
@@ -93,30 +113,39 @@ io.on('connection', (socket) => {
         }
       }
     }
-    io.emit('gameState', gameState);
+    io.to(roomId).emit('gameState', gameState);
   });
 
   socket.on('updateSettings', (settings: GameSettings) => {
+    const roomId = socket.data.roomId;
+    if (!roomId) return;
+    const gameState = getGameState(roomId);
     gameState.settings = settings;
-    io.emit('gameState', gameState);
+    io.to(roomId).emit('gameState', gameState);
   });
 
   socket.on('setTeams', (teams: Team[]) => {
+    const roomId = socket.data.roomId;
+    if (!roomId) return;
+    const gameState = getGameState(roomId);
     gameState.teams = teams;
-    io.emit('gameState', gameState);
+    io.to(roomId).emit('gameState', gameState);
   });
 
   socket.on('setPhase', (phase: GameState['phase']) => {
+    const roomId = socket.data.roomId;
+    if (!roomId) return;
+    const gameState = getGameState(roomId);
     gameState.phase = phase;
-    if (phase === 'playing') {
-       // initialize playing state maybe? or it's handled via custom events
-    }
-    io.emit('gameState', gameState);
+    io.to(roomId).emit('gameState', gameState);
   });
   
   socket.on('updateState', (partialState: Partial<GameState>) => {
-    gameState = { ...gameState, ...partialState };
-    io.emit('gameState', gameState);
+    const roomId = socket.data.roomId;
+    if (!roomId) return;
+    const gameState = getGameState(roomId);
+    games[roomId] = { ...gameState, ...partialState };
+    io.to(roomId).emit('gameState', games[roomId]);
   });
 
   socket.on('disconnect', () => {

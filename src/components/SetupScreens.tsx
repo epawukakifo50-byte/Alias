@@ -3,6 +3,69 @@ import { GameSettings, MatchHistory, Team, Player } from '../types';
 import { Play, Settings, History, Plus, Trash2, ChevronLeft, Trophy, Users, UserPlus } from 'lucide-react';
 import { useState } from 'react';
 
+export function LandingScreen({ 
+  localPlayer, 
+  onCreate, 
+  onJoin, 
+  onUpdateName 
+}: { 
+  localPlayer: Player | null, 
+  onCreate: () => void, 
+  onJoin: (code: string) => void,
+  onUpdateName: (name: string) => void 
+}) {
+  const [code, setCode] = useState('');
+  
+  return (
+    <div className="flex flex-col items-center justify-center p-6 h-[70vh] max-w-sm mx-auto">
+       <span className="bg-[#CCFF00] text-black font-black px-6 py-2 text-6xl skew-x-[-10deg] uppercase tracking-tighter inline-block shadow-2xl mb-12">
+          ЭЛИАС
+       </span>
+       
+       <div className="w-full bg-[#111] p-6 rounded-2xl border border-[#333] mb-8">
+         <label className="block text-xs font-bold uppercase tracking-widest text-[#888] mb-2">ВАШ НИКНЕЙМ</label>
+         <input 
+           type="text" 
+           value={localPlayer?.name || ''} 
+           onChange={(e) => onUpdateName(e.target.value)}
+           className="w-full bg-[#222] border border-[#444] rounded-lg px-4 py-3 text-white font-bold focus:outline-none focus:border-[#CCFF00] transition-colors shadow-inner"
+         />
+       </div>
+
+       <button 
+         onClick={onCreate}
+         className="w-full bg-[#CCFF00] text-black py-4 rounded-xl text-xl font-black uppercase hover:bg-white focus:outline-none transition-all shadow-lg shadow-[#CCFF00]/20 mb-8"
+       >
+         СОЗДАТЬ ИГРУ
+       </button>
+
+       <div className="w-full flex items-center gap-4 mb-4">
+         <div className="flex-1 h-px bg-[#333]"></div>
+         <span className="text-[#666] text-xs font-bold uppercase tracking-widest">ИЛИ ПО КОДУ</span>
+         <div className="flex-1 h-px bg-[#333]"></div>
+       </div>
+
+       <div className="w-full flex gap-2">
+         <input 
+           type="text"
+           placeholder="000000"
+           value={code}
+           onChange={(e) => setCode(e.target.value.toUpperCase())}
+           maxLength={6}
+           className="flex-1 bg-[#111] border border-[#333] rounded-xl px-4 py-3 text-center text-xl font-black tracking-widest text-white focus:outline-none focus:border-[#CCFF00] transition-colors"
+         />
+         <button 
+            onClick={() => code.length > 0 && onJoin(code)}
+            disabled={code.length === 0}
+            className="bg-[#222] text-white px-6 rounded-xl font-black uppercase hover:bg-[#333] disabled:opacity-50 disabled:cursor-not-allowed border border-[#333] transition-colors"
+         >
+           ВОЙТИ
+         </button>
+       </div>
+    </div>
+  );
+}
+
 export function MenuScreen({ 
   onPlay, 
   onHistory, 
@@ -120,7 +183,8 @@ export function SetupScreen({
   onStart, 
   onBack,
   localPlayerId,
-  onMovePlayer
+  onMovePlayer,
+  isHost
 }: { 
   teams: Team[],
   spectators: Player[],
@@ -130,7 +194,8 @@ export function SetupScreen({
   onStart: () => void, 
   onBack: () => void,
   localPlayerId: string,
-  onMovePlayer: (teamId: string | 'spectator') => void
+  onMovePlayer: (teamId: string | 'spectator') => void,
+  isHost: boolean
 }) {
   const addTeam = () => {
     if (teams.length >= 6) return;
@@ -204,10 +269,11 @@ export function SetupScreen({
                         type="text"
                         value={team.name}
                         onChange={(e) => updateTeamName(team.id, e.target.value)}
+                        disabled={!isHost}
                         className="w-full bg-transparent text-2xl font-black uppercase tracking-tighter text-white outline-none focus:text-[#CCFF00] transition-colors border-b border-transparent focus:border-[#CCFF00]"
                       />
                     </div>
-                    {teams.length > 2 && (
+                    {isHost && teams.length > 2 && (
                       <button onClick={() => removeTeam(team.id)} className="p-2 text-[#444] hover:text-red-500 transition-colors">
                         <Trash2 size={16} />
                       </button>
@@ -240,7 +306,7 @@ export function SetupScreen({
                 </div>
               ))}
               
-              {teams.length < 6 && (
+              {isHost && teams.length < 6 && (
                 <button onClick={addTeam} className="bg-transparent border-2 border-dashed border-[#222] min-h-[200px] hover:border-[#CCFF00] text-[#444] hover:text-[#CCFF00] font-black uppercase tracking-widest text-sm transition-all flex flex-col items-center justify-center gap-4">
                   <Plus size={32} />
                   СОЗДАТЬ
@@ -266,6 +332,7 @@ export function SetupScreen({
                 type="range" min="10" max="100" step="10" 
                 value={settings.scoreToWin} 
                 onChange={(e) => setSettings({...settings, scoreToWin: parseInt(e.target.value)})}
+                disabled={!isHost}
                 className="w-full accent-[#CCFF00]"
               />
             </div>
@@ -279,6 +346,7 @@ export function SetupScreen({
                 type="range" min="30" max="120" step="15" 
                 value={settings.turnDurationSeconds} 
                 onChange={(e) => setSettings({...settings, turnDurationSeconds: parseInt(e.target.value)})}
+                disabled={!isHost}
                 className="w-full accent-[#CCFF00]"
               />
             </div>
@@ -287,6 +355,7 @@ export function SetupScreen({
               <span className="text-xs font-black uppercase tracking-widest text-[#888]">Штраф пропуска</span>
               <button 
                 onClick={() => setSettings({...settings, penaltyForSkip: !settings.penaltyForSkip})}
+                disabled={!isHost}
                 className={`w-14 h-8 transition-colors ${settings.penaltyForSkip ? 'bg-[#CCFF00]' : 'bg-[#333]'}`}
               >
                 <div className={`w-6 h-6 m-1 bg-black transition-transform ${settings.penaltyForSkip ? 'translate-x-6' : 'translate-x-0'}`} />
@@ -300,10 +369,10 @@ export function SetupScreen({
       <div className="pt-8 bg-[#0A0A0A] mt-auto">
         <button 
           onClick={onStart} 
-          disabled={teams.some(t => t.players.length === 0)}
+          disabled={!isHost || teams.some(t => t.players.length === 0)}
           className="w-full bg-[#CCFF00] text-black h-24 text-3xl font-black uppercase hover:bg-white transition-colors disabled:opacity-50 disabled:bg-[#333] disabled:text-[#666] disabled:cursor-not-allowed"
         >
-          {teams.some(t => t.players.length === 0) ? 'В командах пусто' : 'НАЧАТЬ ИГРУ'}
+          {!isHost ? 'ОЖИДАЕМ ХОСТА' : teams.some(t => t.players.length === 0) ? 'В командах пусто' : 'НАЧАТЬ ИГРУ'}
         </button>
       </div>
     </motion.div>
