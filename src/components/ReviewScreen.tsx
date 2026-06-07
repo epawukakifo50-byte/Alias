@@ -41,7 +41,7 @@ export function ReviewScreen({
         <h2 className="text-[10px] uppercase tracking-[0.5em] opacity-40 mb-2">Итоги раунда</h2>
         <div className="flex justify-center items-end gap-2 text-white mt-4">
           <span className="text-sm font-black uppercase tracking-widest opacity-30 mb-2">ЗАРАБОТАНО</span>
-          <span className={`text-[80px] font-black leading-none tracking-tighter ${pointsMade > 0 ? 'text-[#CCFF00]' : pointsMade < 0 ? 'text-red-500' : 'text-white'}`}>
+          <span className={`text-[80px] font-black leading-none tracking-tighter ${pointsMade > 0 ? 'text-[var(--accent)]' : pointsMade < 0 ? 'text-red-500' : 'text-white'}`}>
             {pointsMade > 0 ? `+${pointsMade}` : pointsMade}
           </span>
         </div>
@@ -59,13 +59,13 @@ export function ReviewScreen({
               return (
                 <div key={w.id} className={`flex items-center justify-between p-4 border mb-2 transition-colors ${
                   w.status === 'guessed' 
-                    ? 'border-[#CCFF00] bg-[#CCFF00]/10 text-white' 
+                    ? 'border-[var(--accent)] bg-[var(--accent)]/10 text-white' 
                     : 'border-[#333] bg-[#111] text-white opacity-60'
                 }`}>
                   <button 
                     onClick={() => onToggleWord(w.id)}
                     disabled={!isActiveTeam}
-                    className={`flex-1 text-left text-lg md:text-xl font-black uppercase tracking-wider ${w.status !== 'guessed' ? 'line-through decoration-2 decoration-red-500' : ''} ${isActiveTeam ? 'hover:text-[#CCFF00] cursor-pointer' : 'cursor-default'}`}
+                    className={`flex-1 text-left text-lg md:text-xl font-black uppercase tracking-wider ${w.status !== 'guessed' ? 'line-through decoration-2 decoration-red-500' : ''} ${isActiveTeam ? 'hover:text-[var(--accent)] cursor-pointer' : 'cursor-default'}`}
                   >
                     {w.word}
                   </button>
@@ -75,7 +75,7 @@ export function ReviewScreen({
                     <div className="flex flex-col items-center gap-1">
                       <button 
                          onClick={() => onVoteWord(w.id, 'accept')}
-                         className={`p-2 rounded hover:bg-[#222] transition-colors ${myVote === 'accept' ? 'text-[#CCFF00]' : 'text-[#888]'}`}
+                         className={`p-2 rounded hover:bg-[#222] transition-colors ${myVote === 'accept' ? 'text-[var(--accent)]' : 'text-[#888]'}`}
                       >
                          <ThumbsUp size={16} />
                       </button>
@@ -99,7 +99,7 @@ export function ReviewScreen({
         {isActiveTeam ? (
           <p className="text-[10px] font-medium uppercase tracking-widest opacity-30 mt-8 text-center bg-[#111] p-2 inline-block mx-auto rounded">Нажмите на слово, чтобы изменить статус</p>
         ) : (
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[#CCFF00] mt-8 text-center bg-[#CCFF00]/10 p-2 inline-block mx-auto rounded">Проголосуйте за слово, если оно было засчитано неверно</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--accent)] mt-8 text-center bg-[var(--accent)]/10 p-2 inline-block mx-auto rounded">Проголосуйте за слово, если оно было засчитано неверно</p>
         )}
       </div>
 
@@ -107,7 +107,7 @@ export function ReviewScreen({
         <button 
           onClick={() => onFinish()}
           disabled={!isActiveTeam}
-          className="w-full bg-[#CCFF00] text-black h-24 text-3xl font-black uppercase hover:bg-white transition-colors flex items-center justify-center gap-4 disabled:opacity-30 disabled:bg-[#333] disabled:text-white"
+          className="w-full bg-[var(--accent)] text-black h-24 text-3xl font-black uppercase hover:bg-white transition-colors flex items-center justify-center gap-4 disabled:opacity-30 disabled:bg-[#333] disabled:text-white"
         >
           ДАЛЕЕ
           {isActiveTeam && <ArrowRight size={32} />}

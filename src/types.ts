@@ -29,6 +29,7 @@ export type GameSettings = {
   scoreToWin: number;
   turnDurationSeconds: number;
   penaltyForSkip: boolean;
+  packId: string;
 };
 
 export type MatchHistory = {

@@ -51,14 +51,29 @@ export function useMultiplayerGame() {
 
     setSocket(newSocket);
 
-    import('../data/words').then(module => {
-      setWordsList(module.WORDS);
+    // Dynamic words setup based on pack
+    import('../data/packs').then(module => {
+      // For now just wait till gameState comes to set correct wordsList.
+      // But we can default to 'standard'.
+      setWordsList(module.packs['standard'].words);
     });
 
     return () => {
       newSocket.disconnect();
     };
   }, []);
+
+  // Update wordsList if settings change
+  useEffect(() => {
+    if (gameState?.settings.packId) {
+      import('../data/packs').then(module => {
+        const selectedPack = module.packs[gameState.settings.packId];
+        if (selectedPack) {
+          setWordsList(selectedPack.words);
+        }
+      });
+    }
+  }, [gameState?.settings.packId]);
 
   const updatePlayerName = (name: string) => {
     if (!localPlayer) return;
@@ -124,6 +139,7 @@ export function useMultiplayerGame() {
       phase: 'pre-turn',
       teams: updatedTeams,
       activeTeamIndex: 0,
+      usedWords: [] // Clear used words for the new game
     });
   };
 

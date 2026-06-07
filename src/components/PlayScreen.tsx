@@ -63,12 +63,12 @@ export function PlayScreen({
   return (
     <div className="flex flex-col h-full w-full max-w-lg mx-auto bg-[#0A0A0A]">
       <div className="h-1/4 flex flex-col items-center justify-center border-b border-[#222] bg-gradient-to-br from-[#111] to-[#0A0A0A] relative overflow-hidden">
-        <span className={`text-[120px] font-black tabular-nums tracking-tighter leading-none z-10 ${timeLeft <= 10 ? 'text-red-500 animate-pulse' : 'text-[#CCFF00]'}`}>
+        <span className={`text-[120px] font-black tabular-nums tracking-tighter leading-none z-10 ${timeLeft <= 10 ? 'text-red-500 animate-pulse' : 'text-[var(--accent)]'}`}>
           {timeLeft}
         </span>
         <span className="text-xs uppercase tracking-[0.5em] opacity-40 mt-2 z-10">Осталось сек</span>
         <motion.div 
-            className={`absolute bottom-0 left-0 h-1 z-20 ${timeLeft <= 10 ? 'bg-red-500' : 'bg-[#CCFF00]'}`}
+            className={`absolute bottom-0 left-0 h-1 z-20 ${timeLeft <= 10 ? 'bg-red-500' : 'bg-[var(--accent)]'}`}
             initial={{ width: '100%' }}
             animate={{ width: `${(timeLeft / timeLimit) * 100}%` }}
             transition={{ ease: "linear", duration: 1 }}
@@ -132,7 +132,7 @@ export function PlayScreen({
             </button>
             <button 
               onClick={handleGuess}
-              className="flex-1 bg-[#CCFF00] text-black text-2xl font-black uppercase hover:bg-white transition-colors leading-none flex flex-col items-center justify-center shadow-lg focus:ring-4 focus:ring-[#CCFF00]/50 outline-none"
+              className="flex-1 bg-[var(--accent)] text-black text-2xl font-black uppercase hover:bg-white transition-colors leading-none flex flex-col items-center justify-center shadow-lg focus:ring-4 focus:ring-[var(--accent)]/50 outline-none"
             >
               <span>Угадал</span>
               <span className="text-sm opacity-50 mt-2 font-bold tracking-widest">+1 ОЧкО</span>

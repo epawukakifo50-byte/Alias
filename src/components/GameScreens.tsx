@@ -25,7 +25,7 @@ export function PreTurnScreen({
         {/* Left Side: Active Team Info */}
         <div className="flex-1 text-center md:text-left flex flex-col justify-center">
           <h3 className="text-sm font-black uppercase tracking-[0.5em] text-[#888] mb-6">ХОД КОМАНДЫ</h3>
-          <h2 className="text-[80px] lg:text-[120px] leading-[0.9] font-black tracking-tighter uppercase mb-6 text-[#CCFF00] drop-shadow-2xl">
+          <h2 className="text-[80px] lg:text-[120px] leading-[0.9] font-black tracking-tighter uppercase mb-6 text-[var(--accent)] drop-shadow-2xl">
             {activeTeam.name}
           </h2>
           
@@ -40,8 +40,10 @@ export function PreTurnScreen({
             {activeTeam.players.map(p => {
               const isPExplainer = p.id === explainer?.id;
               return (
-                <span key={p.id} className={`px-4 py-2 border rounded border-[#444] text-sm font-black uppercase tracking-widest ${isPExplainer ? 'text-[#CCFF00] border-[#CCFF00] bg-[#CCFF00]/10' : 'text-white'}`}>
-                  {p.name} {p.id === localPlayerId && !isPExplainer && '(ВЫ)'}
+                <span key={p.id} className={`px-4 py-2 border rounded border-[#444] text-sm font-black uppercase tracking-widest ${isPExplainer ? 'border-[var(--accent)] bg-[var(--accent)]/10' : 'text-white'}`}>
+                  <span className={isPExplainer ? 'text-[var(--accent)]' : ''}>
+                    {p.name} {p.id === localPlayerId && !isPExplainer && '(ВЫ)'}
+                  </span>
                 </span>
               );
             })}
@@ -54,7 +56,7 @@ export function PreTurnScreen({
             <button 
               onClick={onReady} 
               disabled={!isExplainer && activeTeam.players.length > 0} 
-              className="w-full md:w-auto px-12 bg-white text-black h-24 text-3xl font-black uppercase hover:bg-[#CCFF00] focus:outline-none transition-all focus:ring-4 focus:ring-[#CCFF00]/50 shadow-2xl flex items-center justify-center gap-4 disabled:opacity-50 disabled:bg-[#333] disabled:text-[#666] disabled:cursor-not-allowed group"
+              className="w-full md:w-auto px-12 bg-white text-black h-24 text-3xl font-black uppercase hover:bg-[var(--accent)] focus:outline-none transition-all focus:ring-4 focus:ring-[var(--accent)]/50 shadow-2xl flex items-center justify-center gap-4 disabled:opacity-50 disabled:bg-[#333] disabled:text-[#666] disabled:cursor-not-allowed group"
             >
               СТАРТ МАТЧА
               <ArrowRight className="group-hover:translate-x-2 transition-transform" size={32} />
@@ -75,7 +77,7 @@ export function PreTurnScreen({
                   <span className="text-xs font-bold text-[#444] mb-2 tracking-widest">0{idx + 1}</span>
                   <span className="text-2xl font-black uppercase tracking-tighter">{team.name}</span>
                 </div>
-                <span className={`text-5xl font-black ${idx === activeTeamIndex ? 'text-[#CCFF00]' : 'text-white'}`}>{team.score}</span>
+                <span className={`text-5xl font-black ${idx === activeTeamIndex ? 'text-[var(--accent)]' : 'text-white'}`}>{team.score}</span>
               </div>
             ))}
           </div>
@@ -98,9 +100,9 @@ export function GameOverScreen({
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col h-full max-w-5xl mx-auto p-6 md:p-12 items-center justify-center">
       <div className="text-center w-full mb-16">
-        <Trophy size={64} className="text-[#CCFF00] mx-auto mb-8 drop-shadow-lg" />
+        <Trophy size={64} className="text-[var(--accent)] mx-auto mb-8 drop-shadow-lg" />
         <h2 className="text-sm font-black uppercase tracking-[0.5em] text-[#888] mb-4">Команда-чемпион</h2>
-        <h1 className="text-[80px] md:text-[140px] font-black leading-none tracking-tighter uppercase text-[#CCFF00] mb-4 break-words drop-shadow-2xl">
+        <h1 className="text-[80px] md:text-[140px] font-black leading-none tracking-tighter uppercase text-[var(--accent)] mb-4 break-words drop-shadow-2xl">
           {winner.name}
         </h1>
         <div className="text-6xl md:text-[100px] font-black tracking-tighter mt-4 flex items-center justify-center gap-6">
@@ -122,7 +124,7 @@ export function GameOverScreen({
         ))}
       </div>
 
-      <button onClick={onToMenu} className="px-16 bg-white text-black h-20 text-2xl font-black uppercase hover:bg-[#CCFF00] transition-colors shadow-xl flex items-center gap-4 focus:ring-4 focus:ring-[#CCFF00]/50 outline-none">
+      <button onClick={onToMenu} className="px-16 bg-white text-black h-20 text-2xl font-black uppercase hover:bg-[var(--accent)] transition-colors shadow-xl flex items-center gap-4 focus:ring-4 focus:ring-[var(--accent)]/50 outline-none">
         <Home size={28} />
         В главное меню
       </button>
