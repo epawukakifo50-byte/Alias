@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Remix: Элиас Вечеринка",
+  "description": "Супер-пупер приложение для игры в Элиас с друзьями. Таймер, слова, интерфейс.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
