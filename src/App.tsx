@@ -4,9 +4,12 @@ import { PreTurnScreen, GameOverScreen } from './components/GameScreens';
 import { PlayScreen } from './components/PlayScreen';
 import { ReviewScreen } from './components/ReviewScreen';
 import { motion, AnimatePresence } from 'motion/react';
+import { useState } from 'react';
 
 export default function App() {
   const game = useMultiplayerGame();
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editNameValue, setEditNameValue] = useState('');
 
   if (!game.roomId) {
     return (
@@ -165,19 +168,39 @@ export default function App() {
           )}
           
           {game.localPlayer && (
-            <button 
-              onClick={() => {
-                const newName = prompt('Введите новый ник:', game.localPlayer?.name);
-                if (newName && newName.trim().length > 0) {
-                  game.updatePlayerName(newName.trim());
-                }
-              }}
-              className="group bg-[#111] hover:bg-[#222] border border-[#333] rounded px-3 py-1 flex items-center gap-2 transition-colors cursor-pointer shadow-lg"
-            >
-              <span className="text-[10px] text-[#666] group-hover:text-[#888] font-black uppercase tracking-widest transition-colors">ВЫ:</span>
-              <span className="text-sm text-white font-bold">{game.localPlayer.name}</span>
-              <svg className="w-3 h-3 text-[#555] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-            </button>
+            isEditingName ? (
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (editNameValue.trim().length > 0) {
+                    game.updatePlayerName(editNameValue.trim());
+                  }
+                  setIsEditingName(false);
+                }}
+                className="bg-[#111] border border-[#CCFF00] rounded px-2 py-1 flex items-center gap-2 shadow-lg"
+              >
+                <input 
+                  autoFocus
+                  type="text"
+                  value={editNameValue}
+                  onChange={(e) => setEditNameValue(e.target.value)}
+                  onBlur={() => setIsEditingName(false)}
+                  className="bg-transparent text-sm text-white font-bold outline-none w-24"
+                />
+              </form>
+            ) : (
+              <button 
+                onClick={() => {
+                  setEditNameValue(game.localPlayer?.name || '');
+                  setIsEditingName(true);
+                }}
+                className="group bg-[#111] hover:bg-[#222] border border-[#333] rounded px-3 py-1 flex items-center gap-2 transition-colors cursor-pointer shadow-lg"
+              >
+                <span className="text-[10px] text-[#666] group-hover:text-[#888] font-black uppercase tracking-widest transition-colors">ВЫ:</span>
+                <span className="text-sm text-white font-bold">{game.localPlayer.name}</span>
+                <svg className="w-3 h-3 text-[#555] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+              </button>
+            )
           )}
         </div>
       </div>

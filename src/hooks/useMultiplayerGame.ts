@@ -61,11 +61,13 @@ export function useMultiplayerGame() {
   }, []);
 
   const updatePlayerName = (name: string) => {
-    if (!localPlayer || !socket || !roomId) return;
+    if (!localPlayer) return;
     const updated = { ...localPlayer, name };
     setLocalPlayer(updated);
     localStorage.setItem('alias_player_name', name);
-    socket.emit('joinGame', updated, roomId); // rejoin to update name
+    if (socket && roomId) {
+      socket.emit('joinGame', updated, roomId); // rejoin to update name
+    }
   };
 
   const joinRoom = (code: string) => {
@@ -257,7 +259,30 @@ export function useMultiplayerGame() {
         } else {
           votes[localPlayer.id] = vote;
         }
-        return { ...w, votes };
+
+        let newStatus = w.status;
+        const totalPlayers = gameState.teams.reduce((acc, t) => acc + t.players.length, 0) + gameState.spectators.length;
+        const threshold = Math.max(1, Math.ceil(totalPlayers * 0.7)); // At least 1 player
+        
+        let acceptCount = 0;
+        let rejectCount = 0;
+        Object.values(votes).forEach(v => {
+          if (v === 'accept') acceptCount++;
+          if (v === 'reject') rejectCount++;
+        });
+
+        if (acceptCount >= threshold) {
+          newStatus = 'guessed';
+          // Clear votes after consensus to allow future toggles if needed, or leave it.
+          // Leaving votes is fine, but we might want to clear them so it visually resets?
+          // Let's just clear votes on consensus to indicate it was applied.
+          Object.keys(votes).forEach(k => delete votes[k]);
+        } else if (rejectCount >= threshold) {
+          newStatus = gameState.settings.penaltyForSkip ? 'penalty' : 'skipped';
+          Object.keys(votes).forEach(k => delete votes[k]);
+        }
+
+        return { ...w, votes, status: newStatus };
       }
       return w;
     });
