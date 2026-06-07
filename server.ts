@@ -28,7 +28,7 @@ function getGameState(roomId: string, initiatorId?: string): GameState {
         turnDurationSeconds: 60,
         scoreToWin: 50,
         penaltyForSkip: false,
-        packId: 'standard',
+        packIds: ['standard'],
       },
       activeTeamIndex: 0,
       currentRoundWords: [],

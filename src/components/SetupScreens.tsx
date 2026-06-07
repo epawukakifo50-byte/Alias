@@ -366,10 +366,10 @@ export function SetupScreen({
 
             <div className="flex flex-col mt-8">
               <span className="text-xs font-black uppercase tracking-widest text-[#888] mb-4">Набор слов</span>
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
+              <div className="flex flex-col gap-2 overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
                 {Object.entries({
                   standard: 'Стандартный',
-                  hard: 'Сложный (для умных)',
+                  hard: 'Сложный',
                   games: 'Игровая терминология',
                   game_titles: 'Названия игр',
                   cartoons: 'Мультфильмы',
@@ -381,16 +381,29 @@ export function SetupScreen({
                   clothes: 'Одежда',
                   space: 'Космос',
                   animals: 'Животные'
-                }).map(([packId, label]) => (
-                  <button 
-                    key={packId}
-                    onClick={() => setSettings({...settings, packId})} 
-                    disabled={!isHost}
-                    className={`py-3 px-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest border transition-colors flex items-center justify-center text-center ${settings.packId === packId || (!settings.packId && packId === 'standard') ? 'bg-[var(--accent)] text-black border-[var(--accent)]' : 'bg-[#111] text-[#888] border-[#333] hover:border-[#555]'}`}
-                  >
-                    {label}
-                  </button>
-                ))}
+                }).map(([packId, label]) => {
+                  const isSelected = settings.packIds?.includes(packId) || (!settings.packIds && packId === 'standard');
+                  return (
+                    <button 
+                      key={packId}
+                      onClick={() => {
+                        let newPackIds = [...(settings.packIds || ['standard'])];
+                        if (newPackIds.includes(packId)) {
+                          newPackIds = newPackIds.filter(id => id !== packId);
+                        } else {
+                          newPackIds.push(packId);
+                        }
+                        if (newPackIds.length === 0) newPackIds = ['standard'];
+                        setSettings({...settings, packIds: newPackIds});
+                      }} 
+                      disabled={!isHost}
+                      className={`py-3 px-4 text-xs font-bold uppercase tracking-widest border transition-colors flex items-center justify-between text-left ${isSelected ? 'bg-[var(--accent)] text-black border-[var(--accent)]' : 'bg-[#111] text-[#888] border-[#333] hover:border-[#555]'}`}
+                    >
+                      <span>{label}</span>
+                      {isSelected && <div className="w-2 h-2 rounded-full bg-black" />}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>

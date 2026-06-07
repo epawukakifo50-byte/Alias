@@ -65,15 +65,32 @@ export function useMultiplayerGame() {
 
   // Update wordsList if settings change
   useEffect(() => {
-    if (gameState?.settings.packId) {
+    if (gameState?.settings.packIds && gameState.settings.packIds.length > 0) {
       import('../data/packs').then(module => {
-        const selectedPack = module.packs[gameState.settings.packId];
-        if (selectedPack) {
-          setWordsList(selectedPack.words);
+        let allWords: string[] = [];
+        gameState.settings.packIds.forEach(id => {
+          const selectedPack = module.packs[id];
+          if (selectedPack) {
+            allWords = allWords.concat(selectedPack.words);
+          }
+        });
+        
+        // Remove duplicates and shuffle maybe, or just remove duplicates
+        allWords = Array.from(new Set(allWords));
+        
+        if (allWords.length > 0) {
+          setWordsList(allWords);
+        } else {
+          setWordsList(module.packs['standard'].words);
         }
       });
+    } else {
+      // fallback
+      import('../data/packs').then(module => {
+         setWordsList(module.packs['standard'].words);
+      });
     }
-  }, [gameState?.settings.packId]);
+  }, [gameState?.settings.packIds]);
 
   const updatePlayerName = (name: string) => {
     if (!localPlayer) return;
