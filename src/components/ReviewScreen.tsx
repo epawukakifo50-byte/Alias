@@ -36,7 +36,7 @@ export function ReviewScreen({
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col h-full max-w-2xl mx-auto bg-[#0A0A0A] p-6 md:p-12 pb-8 pt-10">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col h-full max-w-2xl mx-auto p-6 md:p-12 pb-8 pt-10">
       <div className="mb-10 text-center border-b border-[#222] pb-8">
         <h2 className="text-[10px] uppercase tracking-[0.5em] opacity-40 mb-2">Итоги раунда</h2>
         <div className="flex justify-center items-end gap-2 text-white mt-4">

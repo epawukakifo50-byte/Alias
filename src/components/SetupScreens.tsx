@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { GameSettings, MatchHistory, Team, Player } from '../types';
-import { Play, Settings, History, Plus, Trash2, ChevronLeft, Trophy, Users, UserPlus } from 'lucide-react';
+import { Play, Settings, History, Plus, Trash2, ChevronLeft, Trophy, Users, UserPlus, Shuffle } from 'lucide-react';
 import { useState } from 'react';
 
 export function LandingScreen({ 
@@ -184,7 +184,8 @@ export function SetupScreen({
   onBack,
   localPlayerId,
   onMovePlayer,
-  isHost
+  isHost,
+  onShuffle
 }: { 
   teams: Team[],
   spectators: Player[],
@@ -195,7 +196,8 @@ export function SetupScreen({
   onBack: () => void,
   localPlayerId: string,
   onMovePlayer: (teamId: string | 'spectator') => void,
-  isHost: boolean
+  isHost: boolean,
+  onShuffle: () => void
 }) {
   const addTeam = () => {
     if (teams.length >= 6) return;
@@ -257,9 +259,19 @@ export function SetupScreen({
           </div>
 
           <div className="space-y-6">
-            <h3 className="text-sm font-black uppercase tracking-widest text-[#666] flex items-center gap-2">
-              <Users size={16} /> Команды
-            </h3>
+            <div className="flex justify-between items-center">
+              <h3 className="text-sm font-black uppercase tracking-widest text-[#666] flex items-center gap-2">
+                <Users size={16} /> Команды
+              </h3>
+              {isHost && (
+                <button 
+                  onClick={onShuffle}
+                  className="text-xs font-black uppercase tracking-widest text-[var(--accent)] border border-[var(--accent)] px-3 py-1.5 hover:bg-[var(--accent)] hover:text-black transition-colors flex items-center gap-2"
+                >
+                  <Shuffle size={14} /> Перемешать игроков
+                </button>
+              )}
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {teams.map((team, idx) => (
@@ -366,7 +378,7 @@ export function SetupScreen({
 
             <div className="flex flex-col mt-8">
               <span className="text-xs font-black uppercase tracking-widest text-[#888] mb-4">Набор слов</span>
-              <div className="flex flex-col gap-2 overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
+              <div className="flex flex-col gap-2 overflow-y-auto max-h-[300px] pr-2">
                 {Object.entries({
                   standard: 'Стандартный',
                   hard: 'Сложный',
@@ -397,10 +409,10 @@ export function SetupScreen({
                         setSettings({...settings, packIds: newPackIds});
                       }} 
                       disabled={!isHost}
-                      className={`py-3 px-4 text-xs font-bold uppercase tracking-widest border transition-colors flex items-center justify-between text-left ${isSelected ? 'bg-[var(--accent)] text-black border-[var(--accent)]' : 'bg-[#111] text-[#888] border-[#333] hover:border-[#555]'}`}
+                      className={`w-full min-h-[48px] py-3 px-4 text-xs font-bold uppercase tracking-widest border transition-colors flex items-center justify-between text-left shrink-0 ${isSelected ? 'bg-[var(--accent)] text-black border-[var(--accent)]' : 'bg-[#111] text-[#888] border-[#333] hover:border-[#555]'}`}
                     >
                       <span>{label}</span>
-                      {isSelected && <div className="w-2 h-2 rounded-full bg-black" />}
+                      {isSelected && <div className="w-2 h-2 rounded-full bg-black shrink-0" />}
                     </button>
                   );
                 })}
@@ -411,7 +423,7 @@ export function SetupScreen({
 
       </div>
 
-      <div className="pt-8 bg-[#0A0A0A] mt-auto">
+      <div className="pt-8 bg-transparent mt-auto">
         <button 
           onClick={onStart} 
           disabled={!isHost || teams.some(t => t.players.length === 0)}

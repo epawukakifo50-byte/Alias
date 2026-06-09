@@ -61,8 +61,8 @@ export function PlayScreen({
   };
 
   return (
-    <div className="flex flex-col h-full w-full max-w-lg mx-auto bg-[#0A0A0A]">
-      <div className="h-1/4 flex flex-col items-center justify-center border-b border-[#222] bg-gradient-to-br from-[#111] to-[#0A0A0A] relative overflow-hidden">
+    <div className="flex flex-col h-full w-full max-w-lg mx-auto">
+      <div className="h-1/4 flex flex-col items-center justify-center border-b border-[#222] bg-[#0A0A0A]/50 relative overflow-hidden backdrop-blur-sm">
         <span className={`text-[120px] font-black tabular-nums tracking-tighter leading-none z-10 ${timeLeft <= 10 ? 'text-red-500 animate-pulse' : 'text-[var(--accent)]'}`}>
           {timeLeft}
         </span>

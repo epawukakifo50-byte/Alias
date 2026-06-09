@@ -149,6 +149,41 @@ export function useMultiplayerGame() {
     socket?.emit('setPhase', phase);
   };
 
+  const shufflePlayers = () => {
+    if (!gameState || !socket) return;
+    const allPlayers = [...gameState.spectators, ...gameState.teams.flatMap(t => t.players)];
+    if (allPlayers.length === 0) return;
+
+    const shuffled = [...allPlayers];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    let numTeams = Math.floor(shuffled.length / 2);
+    if (numTeams < 2) numTeams = 2;
+    if (numTeams > 6) numTeams = 6;
+
+    const newTeams: Team[] = [];
+    for (let i = 0; i < numTeams; i++) {
+      const existing = gameState.teams[i];
+      newTeams.push({
+        id: existing ? existing.id : uuidv4(),
+        name: existing ? existing.name : `Команда ${i + 1}`,
+        score: 0,
+        players: [],
+        currentExplainerIndex: 0
+      });
+    }
+
+    shuffled.forEach((p, index) => {
+      const teamIndex = index % numTeams;
+      newTeams[teamIndex].players.push(p);
+    });
+
+    socket.emit('updateState', { teams: newTeams, spectators: [] });
+  };
+
   const startGame = () => {
     if (!gameState || !socket) return;
     const updatedTeams = gameState.teams.map(t => ({ ...t, score: 0, currentExplainerIndex: 0 }));
@@ -351,6 +386,7 @@ export function useMultiplayerGame() {
     resetToMenu,
     updatePartialState,
     toggleWordStatus,
-    voteWord
+    voteWord,
+    shufflePlayers
   };
 }

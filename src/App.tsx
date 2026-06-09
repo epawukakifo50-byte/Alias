@@ -12,7 +12,7 @@ export default function App() {
   const [editNameValue, setEditNameValue] = useState('');
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
   
-  const [themeMode, setThemeMode] = useState<'solid' | 'gradient' | 'holographic'>(() => localStorage.getItem('alias_theme_mode') as 'solid' | 'gradient' | 'holographic' || 'solid');
+  const [themeMode, setThemeMode] = useState<'solid' | 'gradient'>(() => localStorage.getItem('alias_theme_mode') as 'solid' | 'gradient' || 'solid');
   const [accentColor, setAccentColor] = useState(() => localStorage.getItem('alias_accent_color') || '#CCFF00');
   const [accentColor2, setAccentColor2] = useState(() => localStorage.getItem('alias_accent_color_2') || '#00FFCC');
 
@@ -21,19 +21,18 @@ export default function App() {
     localStorage.setItem('alias_accent_color', accentColor);
     localStorage.setItem('alias_accent_color_2', accentColor2);
     document.documentElement.style.setProperty('--accent', accentColor);
-    document.documentElement.style.setProperty('--accent-secondary', (themeMode === 'gradient' || themeMode === 'holographic') ? accentColor2 : accentColor);
+    document.documentElement.style.setProperty('--accent-secondary', themeMode === 'gradient' ? accentColor2 : accentColor);
   }, [themeMode, accentColor, accentColor2]);
 
   // Apply theme class to a wrapper or body
   useEffect(() => {
     document.body.className = '';
     if (themeMode === 'gradient') document.body.classList.add('theme-gradient');
-    if (themeMode === 'holographic') document.body.classList.add('theme-holographic');
   }, [themeMode]);
 
   if (!game.roomId) {
     return (
-      <div className="h-screen w-screen bg-[#0A0A0A] font-sans text-[#F5F5F5] overflow-hidden select-none flex flex-col pt-16">
+      <div className={`h-screen w-screen font-sans text-[#F5F5F5] overflow-hidden select-none flex flex-col pt-16 bg-[#0A0A0A]`}>
         <LandingScreen 
             localPlayer={game.localPlayer}
             onCreate={game.createRoom}
@@ -83,6 +82,7 @@ export default function App() {
             localPlayerId={game.localPlayer?.id || ''}
             onMovePlayer={game.movePlayer}
             isHost={game.gameState.hostId === game.localPlayer?.id}
+            onShuffle={game.shufflePlayers}
           />
         );
       case 'pre-turn':
@@ -142,7 +142,7 @@ export default function App() {
   };
 
   return (
-    <div className="h-screen w-screen bg-[#0A0A0A] font-sans text-[#F5F5F5] overflow-hidden select-none flex flex-col pt-16">
+    <div className="h-screen w-screen font-sans text-[#F5F5F5] overflow-hidden select-none flex flex-col pt-16 bg-[#0A0A0A]">
       
       {/* GLOBAL HEADER */}
       <div className="absolute top-0 w-full p-4 flex justify-between items-start z-50 pointer-events-none">
@@ -246,16 +246,15 @@ export default function App() {
             
             <div className="mb-6">
               <label className="block text-xs font-bold uppercase text-[#888] mb-3 tracking-widest">Цветовая Схема</label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="flex gap-2">
                 <button onClick={() => setThemeMode('solid')} className={`py-2 text-xs font-bold uppercase rounded border ${themeMode === 'solid' ? 'bg-[var(--accent)] text-black border-[var(--accent)]' : 'bg-[#222] text-[#888] border-[#333]'}`}>Солид</button>
                 <button onClick={() => setThemeMode('gradient')} className={`py-2 text-xs font-bold uppercase rounded border ${themeMode === 'gradient' ? 'bg-[var(--accent)] text-black border-[var(--accent)]' : 'bg-[#222] text-[#888] border-[#333]'}`}>Градиент</button>
-                <button onClick={() => setThemeMode('holographic')} className={`py-2 text-xs font-bold uppercase rounded border ${themeMode === 'holographic' ? 'bg-[var(--accent)] text-black border-[var(--accent)]' : 'bg-[#222] text-[#888] border-[#333]'}`}>Голография</button>
               </div>
             </div>
 
             <div className="mb-6">
               <label className="block text-xs font-bold uppercase text-[#888] mb-3 tracking-widest">
-                {themeMode === 'gradient' ? 'Цвета Градиента' : themeMode === 'holographic' ? 'Цвет Перелива' : 'Акцентный Цвет'}
+                {themeMode === 'gradient' ? 'Цвета Градиента' : 'Акцентный Цвет'}
               </label>
               <div className="flex flex-col gap-4">
                 <div className="flex gap-4 items-center">
@@ -277,7 +276,7 @@ export default function App() {
                   </div>
                 </div>
                 
-                {(themeMode === 'gradient' || themeMode === 'holographic') && (
+                {themeMode === 'gradient' && (
                   <div className="flex gap-4 items-center">
                     <input 
                       type="color" 
@@ -297,6 +296,8 @@ export default function App() {
                     </div>
                   </div>
                 )}
+                
+
               </div>
             </div>
 
